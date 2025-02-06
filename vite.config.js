@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   // The base option ensures the app’s assets (JS/CSS) load from /bama3/ on GitHub Pages
-  base: '/BAMAELECTRIC1/',
+  base: '/BAMAELEC/',
   plugins: [react()],
   server: {
     // Allow your specific Replit host
