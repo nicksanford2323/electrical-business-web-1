@@ -7,7 +7,7 @@ import sys
 # 1. READ ENVIRONMENT VARIABLES
 # ------------------------------------------------------------------------------
 GITHUB_USERNAME = "nicksanford2323"   # <-- Set your GitHub username here
-REPO_NAME = "bama1"               # <-- The new repository name you want
+REPO_NAME = "bama3"               # <-- The new repository name you want
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 # If the token isn't set, print an error and exit.
 if not GITHUB_TOKEN:

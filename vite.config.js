@@ -1,7 +1,10 @@
+// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  // The base option ensures the app’s assets (JS/CSS) load from /bama3/ on GitHub Pages
+  base: '/bama3/',
   plugins: [react()],
   server: {
     // Allow your specific Replit host
