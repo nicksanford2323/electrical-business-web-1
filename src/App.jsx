@@ -14,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // URL of your JSON data on GitHub
-    const dataUrl = 'https://raw.githubusercontent.com/nicksanford2323/business-data-fixed2/main/business-data-fixed2.json';
+    const dataUrl = 'https://raw.githubusercontent.com/nicksanford2323/business-data-fixed2/main/beast.json';
     fetch(dataUrl)
       .then((response) => response.json())
       .then((data) => {

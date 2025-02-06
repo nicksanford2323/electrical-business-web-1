@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "React TypeScript on Replit, using Vite bundler",
-  "homepage": "https://nicksanford2323.github.io/BAMAELECTRIC",
+  "homepage": "https://nicksanford2323.github.io/BAMAELECTRIC1",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
