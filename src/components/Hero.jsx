@@ -5,6 +5,7 @@ function Hero({ business }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const heroSlides = business.sections.hero;
+  const { phone, color1, color2 } = business.businessInfo;
 
   // Auto-advance slides
   useEffect(() => {
@@ -15,9 +16,33 @@ function Hero({ business }) {
         setIsTransitioning(false);
       }, 500);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [heroSlides.length]);
+
+  // Get button config for current slide
+  const getButtonConfig = (index) => {
+    switch(index % 3) {
+      case 0:
+        return {
+          text: `Call Now: ${phone}`,
+          action: () => window.location.href = `tel:${phone}`
+        };
+      case 1:
+        return {
+          text: 'Get a Quote',
+          action: () => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })
+        };
+      case 2:
+        return {
+          text: 'View Gallery',
+          action: () => document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' })
+        };
+      default:
+        return null;
+    }
+  };
+
+  const buttonConfig = getButtonConfig(currentSlide);
 
   return (
     <section className="hero-section">
@@ -28,11 +53,24 @@ function Hero({ business }) {
           backgroundImage: `url(${heroSlides[currentSlide].imageIndex})`
         }}
       />
-
       {/* Content Overlay */}
       <div className="hero-content">
         <h1>{business.businessName}</h1>
         <p className="hero-text">{heroSlides[currentSlide].callToAction}</p>
+
+        {/* Action Button */}
+        {buttonConfig && (
+          <button 
+            className="hero-button"
+            onClick={buttonConfig.action}
+            style={{
+              backgroundColor: color1 || '#4a90e2',
+              borderColor: color2 || '#357abd'
+            }}
+          >
+            {buttonConfig.text}
+          </button>
+        )}
 
         {/* Slide Indicators */}
         <div className="slide-indicators">

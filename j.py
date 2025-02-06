@@ -1,92 +1,106 @@
-#!/usr/bin/env python3
 import os
-import subprocess
-import requests
 import sys
+import base64
+import json
+import re
+import requests
 
-# Configuration variables
+# ------------------------------------------------------------------------------
+# Configuration
+# ------------------------------------------------------------------------------
 GITHUB_USERNAME = "nicksanford2323"
-REPO_NAME = "electrical123"
-GITHUB_API_URL = "https://api.github.com"
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+REPO_NAME = "business-data-fixed2"
+FILE_PATH = "data.json"  # If it's in a subfolder, e.g. "folder/data.json"
+COMMIT_MESSAGE = "Fix logo URLs by removing sXX-p-k-no-ns-nd snippet"
 
+# Read token from Replit Secrets
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
 if not GITHUB_TOKEN:
-    print("Error: GITHUB_TOKEN environment variable not set.")
+    print("Error: GITHUB_TOKEN not found in environment variables.")
     sys.exit(1)
 
-def run_cmd(cmd):
-    """Run a shell command and exit if it fails."""
-    print(f"Running: {cmd}")
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"Command failed: {cmd}")
-        print("STDOUT:", result.stdout)
-        print("STDERR:", result.stderr)
-        sys.exit(result.returncode)
-    return result.stdout.strip()
+# API base URLs
+GET_CONTENT_URL = f"https://api.github.com/repos/{GITHUB_USERNAME}/{REPO_NAME}/contents/{FILE_PATH}"
+# We'll use the same URL for PUT requests (GitHub content API)
 
-def create_github_repo():
-    """Create a new GitHub repository using the GitHub API."""
-    url = f"{GITHUB_API_URL}/user/repos"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}"}
-    data = {
-        "name": REPO_NAME,
-        "private": False,  # Set to True if you want a private repo
-    }
-    response = requests.post(url, headers=headers, json=data)
+# ------------------------------------------------------------------------------
+# Helper function to remove the snippet from the logo URL
+# ------------------------------------------------------------------------------
+def remove_logo_snippet(logo_url: str) -> str:
+    """
+    Removes the 'sXX-p-k-no-ns-nd' snippet (with optional trailing slash)
+    from the Google logo URL. Example:
+      '.../s44-p-k-no-ns-nd/photo.jpg' -> '.../photo.jpg'
+    """
+    return re.sub(r's\d+-p-k-no-ns-nd/?', '', logo_url)
 
-    if response.status_code == 201:
-        print(f"Repository '{REPO_NAME}' created successfully.")
-    elif response.status_code == 422:
-        # Repository may already exist
-        print(f"Repository '{REPO_NAME}' may already exist. Continuing...")
-    else:
-        print("Failed to create repository. Response:")
-        print(response.json())
-        sys.exit(1)
+# ------------------------------------------------------------------------------
+# 1. GET the existing file from GitHub
+# ------------------------------------------------------------------------------
+headers = {
+    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github.v3+json"
+}
 
-def setup_git_repo():
-    """Initialize a local Git repository, commit changes, and push to GitHub."""
-    # Initialize git if not already initialized
-    if not os.path.exists(".git"):
-        run_cmd("git init")
-    else:
-        print("Git repository already initialized.")
+print(f"Fetching {FILE_PATH} from {REPO_NAME}...")
+response = requests.get(GET_CONTENT_URL, headers=headers)
 
-    # Add all files and commit changes
-    run_cmd("git add .")
-    try:
-        run_cmd('git commit -m "Initial commit"')
-    except SystemExit:
-        print("Nothing to commit or commit already exists.")
+if response.status_code == 200:
+    file_content = response.json()
+    # Extract base64-encoded content
+    encoded_content = file_content["content"]
+    sha_value = file_content["sha"]
+else:
+    print(f"Error: Could not fetch {FILE_PATH}. HTTP {response.status_code}")
+    print(response.json())
+    sys.exit(1)
 
-    # Ensure the branch is named main
-    run_cmd("git branch -M main")
+# Decode from base64 to string
+decoded_str = base64.b64decode(encoded_content).decode("utf-8")
 
-    # Remove existing remote (if any)
-    try:
-        run_cmd("git remote remove origin")
-    except Exception as e:
-        print("No existing remote origin found; continuing...")
+# Parse JSON
+try:
+    data = json.loads(decoded_str)
+except json.JSONDecodeError as e:
+    print("Error decoding JSON:", str(e))
+    sys.exit(1)
 
-    # Set remote URL using your token for HTTPS authentication
-    remote_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
-    run_cmd(f"git remote add origin {remote_url}")
+# ------------------------------------------------------------------------------
+# 2. Transform the data (clean up logos)
+# ------------------------------------------------------------------------------
+changed_count = 0
 
-    # Push the code to GitHub (push the main branch)
-    run_cmd("git push -u origin main")
+for place_id, place_data in data.items():
+    if "businessInfo" in place_data:
+        biz_info = place_data["businessInfo"]
+        if "logo" in biz_info and biz_info["logo"]:
+            original_logo = biz_info["logo"]
+            cleaned_logo = remove_logo_snippet(original_logo)
+            if cleaned_logo != original_logo:
+                biz_info["logo"] = cleaned_logo
+                changed_count += 1
 
-def main():
-    print("Creating GitHub repository...")
-    create_github_repo()
+print(f"Logos cleaned: {changed_count} changed.")
 
-    print("Setting up local Git repository and pushing code...")
-    setup_git_repo()
+# ------------------------------------------------------------------------------
+# 3. Encode updated JSON & PUT back to GitHub
+# ------------------------------------------------------------------------------
+updated_json_str = json.dumps(data, indent=2, ensure_ascii=False)
+updated_base64 = base64.b64encode(updated_json_str.encode("utf-8")).decode("utf-8")
 
-    print("Repository setup complete!")
-    print("Now, to deploy your site via GitHub Pages, run:")
-    print("    npm run deploy")
-    print("Then, configure GitHub Pages in your repository settings to serve from the gh-pages branch.")
+payload = {
+    "message": COMMIT_MESSAGE,
+    "content": updated_base64,
+    "sha": sha_value
+}
 
-if __name__ == "__main__":
-    main()
+print(f"Committing updated {FILE_PATH} to GitHub...")
+
+put_resp = requests.put(GET_CONTENT_URL, headers=headers, json=payload)
+
+if put_resp.status_code in (200, 201):
+    print("Success! data.json updated and committed to the repo.")
+else:
+    print(f"Error updating file. HTTP {put_resp.status_code}")
+    print(put_resp.json())
+    sys.exit(1)
