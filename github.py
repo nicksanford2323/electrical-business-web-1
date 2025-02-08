@@ -6,7 +6,7 @@ from datetime import datetime
 # GitHub configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 USERNAME = "Nicksanford2323"
-REPO_NAME = f"electrical-site-{datetime.now().strftime('%Y%m%d')}"
+REPO_NAME = f"ELECTRIC-SITE-{datetime.now().strftime('%Y%m%d')}"
 
 # GitHub API headers
 headers = {
