@@ -1,72 +1,117 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import './Services.css';
 
 function Services({ business }) {
-  const { color1, color2 } = business.businessInfo;
+  const { color1, color2, phone } = business.businessInfo;
+  const servicesRef = useRef(null);
 
-  // Default colors if none provided
-  const primaryColor = color1 || '#4a90e2';
-  const secondaryColor = color2 || '#357abd';
+  // Animation observer setup
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '50px'
+      }
+    );
+
+    const cards = document.querySelectorAll('.service-card');
+    cards.forEach(card => observer.observe(card));
+
+    return () => cards.forEach(card => observer.unobserve(card));
+  }, []);
 
   const services = [
     {
       title: "Residential Services",
-      description: "Complete home electrical solutions including installations, repairs, and upgrades for your peace of mind.",
-      icon: "⚡"
+      description:
+        "Complete home electrical solutions including installations, repairs, and upgrades for your peace of mind.",
+      icon: "⚡",
     },
     {
       title: "Commercial Services",
-      description: "Professional electrical installations and maintenance for businesses of all sizes.",
-      icon: "🏢"
+      description:
+        "Professional electrical installations and maintenance for businesses of all sizes.",
+      icon: "🏢",
     },
     {
       title: "Emergency Service",
-      description: "24/7 emergency electrical repairs and support when you need it most.",
-      icon: "🚨"
+      description:
+        "24/7 emergency electrical repairs and support when you need it most.",
+      icon: "🚨",
     },
     {
       title: "Panel Upgrades",
-      description: "Electrical panel replacements and capacity upgrades to meet your power needs.",
-      icon: "🔌"
+      description:
+        "Electrical panel replacements and capacity upgrades to meet your power needs.",
+      icon: "🔌",
     },
     {
       title: "Safety Inspections",
-      description: "Comprehensive electrical safety audits and certification services.",
-      icon: "✓"
+      description:
+        "Comprehensive electrical safety audits and certification services.",
+      icon: "✓",
     },
     {
       title: "Lighting Design",
-      description: "Custom lighting solutions to enhance your space with modern, efficient fixtures.",
-      icon: "💡"
-    }
+      description:
+        "Custom lighting solutions to enhance your space with modern, efficient fixtures.",
+      icon: "💡",
+    },
   ];
 
   return (
-    <section id="services" className="services-section">
+    <section id="services" className="services-section" ref={servicesRef}>
       {/* Section Header */}
       <div className="services-header">
-        <h2>Our Services</h2>
-        <div 
-          className="underline" 
-          style={{ backgroundColor: primaryColor }}
-        ></div>
-        <p>Professional electrical solutions for residential and commercial properties</p>
+        <h2 style={{ color: color1 || '#3498db' }}>
+          Our Services
+        </h2>
+        <p>
+          Contact us for a complete list of our professional electrical services and solutions
+        </p>
       </div>
 
       {/* Services Grid */}
       <div className="services-grid">
         {services.map((service, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="service-card"
             style={{
-              '--hover-color': primaryColor,
-              '--border-color': secondaryColor
+              '--card-color': color1 || '#3498db',
             }}
           >
-            <div className="service-icon">{service.icon}</div>
-            <h3>{service.title}</h3>
-            <p>{service.description}</p>
+            <div 
+              className="service-icon"
+              style={{ color: color1 || '#3498db' }}
+            >
+              {service.icon}
+            </div>
+
+            <div className="service-details">
+              <h3>{service.title}</h3>
+              <p>{service.description}</p>
+            </div>
+
+            <div className="service-contact">
+              <a
+                href={`tel:${phone}`}
+                className="contact-button"
+                style={{
+                  background: `linear-gradient(45deg, ${color1 || '#3498db'}, ${color2 || '#2980b9'})`,
+                  boxShadow: `0 4px 15px ${color1 ? color1 + '4D' : 'rgba(52, 152, 219, 0.3)'}`,
+                }}
+              >
+                Call Us: {phone}
+              </a>
+            </div>
           </div>
         ))}
       </div>

@@ -1,75 +1,80 @@
-// src/components/About.jsx
 import React, { useState, useEffect } from 'react';
 import './About.css';
 
-function About({ business }) {
-  // If no business data is passed yet, render nothing
-  if (!business) return null;
+const About = ({ business }) => {
+  // Safety checks to ensure we have valid data
+  if (
+    !business.sections ||
+    !business.sections.aboutUs ||
+    business.sections.aboutUs.length < 3
+  ) {
+    return null;
+  }
 
-  // Fallback images if business doesn't have about images
-  const fallbackImages = [
-    {
-      url: 'https://via.placeholder.com/800x450.png?text=About+Image+1',
-      description: 'Placeholder Image 1'
-    },
-    {
-      url: 'https://via.placeholder.com/800x450.png?text=About+Image+2',
-      description: 'Placeholder Image 2'
-    }
+  // Get the two slideshow images
+  const images = [
+    business.sections.aboutUs[0].imageIndex,
+    business.sections.aboutUs[1].imageIndex
   ];
 
-  // We'll assume the business has 'sections.aboutUsImages' for the slideshow
-  // If not, we fall back to the placeholders
-  const aboutImages = 
-    (business.sections &&
-     business.sections.aboutUsImages &&
-     business.sections.aboutUsImages.length >= 2)
-      ? business.sections.aboutUsImages
-      : fallbackImages;
+  // Get the paragraph from the third item
+  const aboutParagraph = business.sections.aboutUs[2].reason || '';
 
-  // We'll assume the about text is stored in 'business.about_us' or 'business.businessInfo.about'
-  // Adjust as needed:
-  const aboutText = business.about_us ||
-    (business.businessInfo && business.businessInfo.about) ||
-    "We are proud to serve our community with expert electrical services...";
-
-  // Slideshow index state
+  // State for which image is currently shown
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Automatic rotation every 5 seconds
+  // Simple slideshow that toggles between the two images every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % aboutImages.length);
+      setCurrentIndex((prevIndex) => (prevIndex === 0 ? 1 : 0));
     }, 5000);
-
     return () => clearInterval(interval);
-  }, [aboutImages.length]);
+  }, []);
+
+  // Add scroll observer for animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const elements = document.querySelectorAll('.fade-in-up');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => elements.forEach((el) => observer.unobserve(el));
+  }, []);
 
   return (
-    <section className="about-section" id="about">
-      <h2 className="about-heading">About Us</h2>
-
-      {/* Slideshow Container */}
-      <div className="slideshow-container">
-        {aboutImages.map((img, idx) => (
-          <div
-            key={idx}
-            className={`slide ${idx === currentIndex ? 'active' : ''}`}
-            style={{ backgroundImage: `url(${img.url})` }}
+    <div className="about-section">
+      <div className="about-content fade-in-up">
+        {/* Slideshow Container */}
+        <div className="about-slideshow">
+          <img
+            src={images[currentIndex]}
+            alt={`About ${business.businessName}`}
+            className="about-image"
+          />
+        </div>
+        {/* Text Container */}
+        <div className="about-info">
+          <h2>About {business.businessName}</h2>
+          <p>{aboutParagraph}</p>
+          <a 
+            href="tel:+12057848512" 
+            className="electric-button"
           >
-            <div className="slide-overlay">
-              <p>{img.description}</p>
-            </div>
-          </div>
-        ))}
+            Call Us: +1 205-784-8512
+          </a>
+        </div>
       </div>
-
-      {/* About Text */}
-      <div className="about-text">
-        <p>{aboutText}</p>
-      </div>
-    </section>
+    </div>
   );
-}
+};
 
 export default About;

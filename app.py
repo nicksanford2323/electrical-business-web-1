@@ -3,9 +3,9 @@ import csv
 
 def main():
     # File path for your JSON file (adjust the path if necessary)
-    input_filename = "46.json46"
+    input_filename = "46.json"
     # Output CSV filename
-    output_filename = "business_data.csv"
+    output_filename = "business_data112.csv"
 
     # Base URL for preview links; we'll append the place ID as a query string parameter.
     base_preview_url = "https://79f7ed2b-4a25-41e2-be82-8a3341ae0aa1-00-3expw1nxlehl5.kirk.replit.dev/BAMAELECTRIC/"
@@ -35,10 +35,8 @@ def main():
             reviews_count = business_info.get("reviews", "")
             city = business_info.get("city", "")
 
-            # Construct the preview link by appending the place ID
-            # (The instructions state that the preview link should be the base URL plus
-            #  "?=" and then the place ID)
-            preview_link = f"{base_preview_url}?={place_id}"
+            # Construct the preview link by appending the place ID with '?id='
+            preview_link = f"{base_preview_url}?id={place_id}"
 
             # Write the row to the CSV file
             writer.writerow([business_name, phone, reviews_link, reviews_count, city, preview_link])

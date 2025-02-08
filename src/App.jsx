@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header.jsx';
 import Hero from './components/Hero.jsx';
-import Services from './components/Services.jsx';
 import About from './components/About.jsx';
+import Services from './components/Services.jsx';
 import Reviews from './components/Reviews.jsx';
 import Gallery from './components/Gallery.jsx';
 import Contact from './components/Contact.jsx';
+import Footer from './components/Footer.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import './App.css';
 
@@ -16,16 +17,11 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    // URL for your data.json
+    // URL of your JSON data on GitHub
     const dataUrl = 'https://raw.githubusercontent.com/nicksanford2323/business-data-fixed2/main/data.json';
 
     fetch(dataUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Fetch error: ${response.status}`);
-        }
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         const params = new URLSearchParams(window.location.search);
         const businessId = params.get('id') || 'ChIJf2n-H9t1uCQRUzPxaliDdqM';
@@ -42,7 +38,7 @@ function App() {
             setTimeout(() => {
               setIsLoading(false);
             }, 1000);
-          }, 6000);
+          }, 4000);
         } else {
           console.error('Business ID not found in JSON. Defaulting to Dupree Electrical.');
           setSelectedBusiness(data['ChIJf2n-H9t1uCQRUzPxaliDdqM']);
@@ -52,7 +48,7 @@ function App() {
             setTimeout(() => {
               setIsLoading(false);
             }, 1000);
-          }, 6000);
+          }, 4000);
         }
       })
       .catch((error) => {
@@ -97,14 +93,14 @@ function App() {
               <Hero business={selectedBusiness} />
             </section>
 
-            {/* Services Section */}
-            <section id="services">
-              <Services business={selectedBusiness} />
-            </section>
-
             {/* About Section */}
             <section id="about">
               <About business={selectedBusiness} />
+            </section>
+
+            {/* Services Section */}
+            <section id="services">
+              <Services business={selectedBusiness} />
             </section>
 
             {/* Reviews Section */}
@@ -117,25 +113,13 @@ function App() {
               <Gallery business={selectedBusiness} />
             </section>
 
-            {/* Contact Section */}
+            {/* Contact Us Section */}
             <section id="contact">
               <Contact business={selectedBusiness} />
             </section>
           </main>
 
-          <footer className="footer">
-            <div className="footer-content">
-              <p>
-                © {new Date().getFullYear()} {selectedBusiness.businessName}. All rights reserved.
-              </p>
-              {selectedBusiness.businessInfo.full_address && (
-                <p>{selectedBusiness.businessInfo.full_address}</p>
-              )}
-              {selectedBusiness.businessInfo.phone && (
-                <p>Phone: {selectedBusiness.businessInfo.phone}</p>
-              )}
-            </div>
-          </footer>
+          <Footer business={selectedBusiness} />
         </div>
       )}
     </>
