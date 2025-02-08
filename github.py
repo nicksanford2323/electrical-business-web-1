@@ -4,9 +4,9 @@ import subprocess
 from datetime import datetime
 
 # GitHub configuration
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')  # Make sure to set this environment variable
+GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 USERNAME = "Nicksanford2323"
-REPO_NAME = f"electrical-business-site-{datetime.now().strftime('%Y%m%d')}"
+REPO_NAME = f"electrical-site-{datetime.now().strftime('%Y%m%d')}"
 
 # GitHub API headers
 headers = {
@@ -38,8 +38,9 @@ def create_repo():
 def setup_local_repo():
     """Initialize local repository and push to GitHub"""
     try:
-        # Initialize git
-        subprocess.run(['git', 'init'], check=True)
+        # Initialize git if not already initialized
+        if not os.path.exists('.git'):
+            subprocess.run(['git', 'init'], check=True)
 
         # Create .gitignore
         with open('.gitignore', 'w') as f:
@@ -94,12 +95,19 @@ jobs:
         # Commit
         subprocess.run(['git', 'commit', '-m', 'Initial commit'], check=True)
 
-        # Add remote
+        # Update remote if it exists, add if it doesn't
         remote_url = f'https://{GITHUB_TOKEN}@github.com/{USERNAME}/{REPO_NAME}.git'
+        try:
+            # Try to remove existing remote
+            subprocess.run(['git', 'remote', 'remove', 'origin'], check=False)
+        except:
+            pass
+
+        # Add new remote
         subprocess.run(['git', 'remote', 'add', 'origin', remote_url], check=True)
 
-        # Push to GitHub
-        subprocess.run(['git', 'push', '-u', 'origin', 'main'], check=True)
+        # Force push to GitHub
+        subprocess.run(['git', 'push', '-u', 'origin', 'main', '--force'], check=True)
 
         print("Successfully set up local repository and pushed to GitHub")
         return True
