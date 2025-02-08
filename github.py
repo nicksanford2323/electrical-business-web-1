@@ -6,7 +6,7 @@ from datetime import datetime
 # GitHub configuration
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 USERNAME = "Nicksanford2323"
-REPO_NAME = f"ELECTRIC-SITE1-"
+REPO_NAME = "electrical-business-web-2025"  # New unique name
 
 # GitHub API headers
 headers = {
@@ -69,12 +69,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm install
@@ -98,7 +99,6 @@ jobs:
         # Update remote if it exists, add if it doesn't
         remote_url = f'https://{GITHUB_TOKEN}@github.com/{USERNAME}/{REPO_NAME}.git'
         try:
-            # Try to remove existing remote
             subprocess.run(['git', 'remote', 'remove', 'origin'], check=False)
         except:
             pass
@@ -121,15 +121,15 @@ jobs:
 
 def update_vite_config():
     """Update vite.config.js for GitHub Pages"""
-    vite_config = '''
-import { defineConfig } from 'vite'
+    vite_config = f"""
+import {{ defineConfig }} from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig({{
   plugins: [react()],
-  base: `/${REPO_NAME}/`,
-})
-'''.strip()
+  base: '/{REPO_NAME}/',
+}})
+""".strip()
 
     with open('vite.config.js', 'w') as f:
         f.write(vite_config)

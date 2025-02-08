@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "React TypeScript on Replit, using Vite bundler",
-  "homepage": "https://nicksanford2323.github.io/ELECTRIC-SITE1",
+  "homepage": "https://nicksanford2323.github.io/electrical-business-web-2025",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -25,4 +25,3 @@
     "vite": "^5.0.0"
   }
 }
-
