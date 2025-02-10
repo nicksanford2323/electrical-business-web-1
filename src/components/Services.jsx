@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
+import { ThemeContext } from '../App';
 import './Services.css';
 
 function Services({ business }) {
   const { color1, color2, phone } = business.businessInfo;
   const servicesRef = useRef(null);
+  const { isDark } = useContext(ThemeContext);
 
-  // Animation observer setup
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -23,7 +24,6 @@ function Services({ business }) {
 
     const cards = document.querySelectorAll('.service-card');
     cards.forEach(card => observer.observe(card));
-
     return () => cards.forEach(card => observer.unobserve(card));
   }, []);
 
@@ -67,8 +67,11 @@ function Services({ business }) {
   ];
 
   return (
-    <section id="services" className="services-section" ref={servicesRef}>
-      {/* Section Header */}
+    <section 
+      id="services" 
+      className={`services-section ${isDark ? 'theme-dark' : 'theme-light'}`} 
+      ref={servicesRef}
+    >
       <div className="services-header">
         <h2 style={{ color: color1 || '#3498db' }}>
           Our Services
@@ -78,12 +81,11 @@ function Services({ business }) {
         </p>
       </div>
 
-      {/* Services Grid */}
       <div className="services-grid">
         {services.map((service, index) => (
           <div
             key={index}
-            className="service-card"
+            className={`service-card ${isDark ? 'theme-dark' : 'theme-light'}`}
             style={{
               '--card-color': color1 || '#3498db',
             }}
