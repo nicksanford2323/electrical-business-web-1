@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import Header from './components/Header.jsx';
 import Hero from './components/Hero.jsx';
 import About from './components/About.jsx';
@@ -10,11 +10,26 @@ import Footer from './components/Footer.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
 import './App.css';
 
+// Create Theme Context
+export const ThemeContext = createContext();
+
 function App() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [currentSection, setCurrentSection] = useState('home');
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+
+  // Theme toggler function
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.body.className = !isDark ? 'theme-dark' : 'theme-light';
+  };
+
+  // Set initial theme
+  useEffect(() => {
+    document.body.className = isDark ? 'theme-dark' : 'theme-light';
+  }, []);
 
   useEffect(() => {
     // URL of your JSON data on GitHub
@@ -66,63 +81,65 @@ function App() {
   };
 
   return (
-    <>
-      {!selectedBusiness ? (
-        <LoadingScreen businessName="Loading..." />
-      ) : isLoading ? (
-        <LoadingScreen
-          businessName={selectedBusiness.businessName}
-          logo={selectedBusiness.businessInfo.logo}
-          colors={{
-            color1: selectedBusiness.businessInfo.color1,
-            color2: selectedBusiness.businessInfo.color2,
-          }}
-          className={isTransitioning ? 'fade-out' : ''}
-        />
-      ) : (
-        <div className="app fade-in">
-          <Header
-            business={selectedBusiness}
-            onNavigate={handleNavigation}
-            currentSection={currentSection}
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      <div className={isDark ? 'theme-dark' : 'theme-light'}>
+        {!selectedBusiness ? (
+          <LoadingScreen businessName="Loading..." />
+        ) : isLoading ? (
+          <LoadingScreen
+            businessName={selectedBusiness.businessName}
+            logo={selectedBusiness.businessInfo.logo}
+            colors={{
+              color1: selectedBusiness.businessInfo.color1,
+              color2: selectedBusiness.businessInfo.color2,
+            }}
+            className={isTransitioning ? 'fade-out' : ''}
           />
+        ) : (
+          <div className="app fade-in">
+            <Header
+              business={selectedBusiness}
+              onNavigate={handleNavigation}
+              currentSection={currentSection}
+            />
 
-          <main>
-            {/* Hero Section */}
-            <section id="home">
-              <Hero business={selectedBusiness} />
-            </section>
+            <main>
+              {/* Hero Section */}
+              <section id="home">
+                <Hero business={selectedBusiness} />
+              </section>
 
-            {/* About Section */}
-            <section id="about">
-              <About business={selectedBusiness} />
-            </section>
+              {/* About Section */}
+              <section id="about">
+                <About business={selectedBusiness} />
+              </section>
 
-            {/* Services Section */}
-            <section id="services">
-              <Services business={selectedBusiness} />
-            </section>
+              {/* Services Section */}
+              <section id="services">
+                <Services business={selectedBusiness} />
+              </section>
 
-            {/* Reviews Section */}
-            <section id="reviews">
-              <Reviews business={selectedBusiness} />
-            </section>
+              {/* Reviews Section */}
+              <section id="reviews">
+                <Reviews business={selectedBusiness} />
+              </section>
 
-            {/* Gallery Section */}
-            <section id="gallery">
-              <Gallery business={selectedBusiness} />
-            </section>
+              {/* Gallery Section */}
+              <section id="gallery">
+                <Gallery business={selectedBusiness} />
+              </section>
 
-            {/* Contact Us Section */}
-            <section id="contact">
-              <Contact business={selectedBusiness} />
-            </section>
-          </main>
+              {/* Contact Us Section */}
+              <section id="contact">
+                <Contact business={selectedBusiness} />
+              </section>
+            </main>
 
-          <Footer business={selectedBusiness} />
-        </div>
-      )}
-    </>
+            <Footer business={selectedBusiness} />
+          </div>
+        )}
+      </div>
+    </ThemeContext.Provider>
   );
 }
 
