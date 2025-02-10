@@ -1,107 +1,123 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { ThemeContext } from '../App';
 import './Footer.css';
 
 function Footer({ business }) {
-  const { businessName } = business;
+  const { isDark } = useContext(ThemeContext);
+  if (!business) return null;
+
   const { 
     phone, 
-    color1, 
-    color2, 
-    reviews_link,
-    facebook_link,
-    instagram_link
-  } = business.businessInfo;
+    email, 
+    full_address,
+    working_hours,
+    license,
+  } = business.businessInfo || {};
 
-  // Default colors if none provided
-  const primaryColor = color1 || '#4a90e2';
-  const secondaryColor = color2 || '#357abd';
+  // Parse working hours if available
+  let parsedHours = {};
+  try {
+    parsedHours = working_hours ? JSON.parse(working_hours) : null;
+  } catch (e) {
+    console.error('Error parsing working hours:', e);
+  }
 
   const currentYear = new Date().getFullYear();
+  const businessName = business.businessName || '';
+
+  // Check if business operates 24/7
+  const is24_7 = parsedHours && Object.values(parsedHours).some(hours => 
+    hours.includes('24 hours') || hours.includes('24/7')
+  );
 
   return (
-    <footer className="footer">
-      <div className="footer-content">
+    <footer className={`footer ${isDark ? 'theme-dark' : 'theme-light'}`}>
+      <div className="footer-grid">
+        {/* Company Info */}
         <div className="footer-section">
           <h3>{businessName}</h3>
-          <p className="business-description">
-            Professional electrical solutions for residential and commercial properties.
-            Serving Jefferson County with pride.
-          </p>
-          <div className="social-links">
-            {facebook_link && (
-              <a href={facebook_link} target="_blank" rel="noopener noreferrer" 
-                 className="social-icon" style={{ '--hover-color': primaryColor }}>
-                <i className="fab fa-facebook-f"></i>
+          <p className="slogan">Your Trusted Electrical Service Partner</p>
+          <div className="company-details">
+            {license && (
+              <p className="license">License #: {license}</p>
+            )}
+            <p className="service-area">Serving Birmingham & Surrounding Areas</p>
+          </div>
+        </div>
+
+        {/* Contact Info */}
+        <div className="footer-section">
+          <h3>Contact Us</h3>
+          <div className="contact-details">
+            {is24_7 && <p>24/7 Emergency Service</p>}
+            <a href={`tel:${phone}`} className="contact-link">
+              📞 {phone}
+            </a>
+            {email && (
+              <a href={`mailto:${email}`} className="contact-link">
+                ✉️ {email}
               </a>
             )}
-            {instagram_link && (
-              <a href={instagram_link} target="_blank" rel="noopener noreferrer" 
-                 className="social-icon" style={{ '--hover-color': primaryColor }}>
-                <i className="fab fa-instagram"></i>
-              </a>
-            )}
-            {reviews_link && (
-              <a href={reviews_link} target="_blank" rel="noopener noreferrer" 
-                 className="social-icon" style={{ '--hover-color': primaryColor }}>
-                <i className="fab fa-google"></i>
-              </a>
+            {full_address && (
+              <p className="address">
+                📍 {full_address}
+              </p>
             )}
           </div>
         </div>
 
+        {/* Services */}
         <div className="footer-section">
-          <h4>Quick Links</h4>
-          <nav className="footer-nav">
-            <a href="#services">Services</a>
-            <a href="#gallery">Gallery</a>
-            <a href="#about">About Us</a>
-            <a href="#contact">Contact</a>
-          </nav>
-        </div>
-
-        <div className="footer-section">
-          <h4>Our Services</h4>
+          <h3>Our Services</h3>
           <ul className="services-list">
             <li>Residential Electrical</li>
             <li>Commercial Services</li>
             <li>Emergency Repairs</li>
-            <li>Safety Inspections</li>
+            <li>Electrical Inspections</li>
+            <li>Panel Upgrades</li>
+            <li>Lighting Installation</li>
           </ul>
         </div>
 
-        <div className="footer-section contact-info">
-          <h4>Contact Us</h4>
-          <p>
-            <i className="fas fa-phone"></i>
-            <a href={`tel:${phone}`} style={{ color: primaryColor }}>{phone}</a>
-          </p>
-          <p>
-            <i className="fas fa-clock"></i>
-            24/7 Emergency Service
-          </p>
-          <p>
-            <i className="fas fa-map-marker-alt"></i>
-            Jefferson County, Alabama
-          </p>
-          <a 
-            href="#contact" 
-            className="contact-button"
-            style={{
-              background: `linear-gradient(45deg, ${primaryColor}, ${secondaryColor})`
-            }}
-          >
-            Get Free Quote
-          </a>
+        {/* Hours */}
+        <div className="footer-section">
+          <h3>Business Hours</h3>
+          <div className="hours-container">
+            {parsedHours ? (
+              Object.entries(parsedHours).map(([day, hours]) => (
+                <p key={day} className="hours-row">
+                  <span className="day">{day}:</span>
+                  <span className="hours">{hours}</span>
+                </p>
+              ))
+            ) : (
+              <>
+                <p>Monday - Friday: 8AM - 5PM</p>
+                <p>Saturday - Sunday: Closed</p>
+              </>
+            )}
+            {is24_7 && (
+              <div className="emergency-callout">
+                <p className="emergency-text">24/7 Emergency Service Available</p>
+                <a href={`tel:${phone}`} className="emergency-button">
+                  Call Now
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Bottom Bar */}
       <div className="footer-bottom">
         <div className="footer-bottom-content">
-          <p>© {currentYear} {businessName}. All rights reserved.</p>
-          <div className="footer-badges">
-            <span className="badge">Licensed</span>
-            <span className="badge">Insured</span>
-            <span className="badge">Bonded</span>
+          <p>
+            © {currentYear} {businessName}. All Rights Reserved
+            {license && <span className="license-number"> | License #{license}</span>}
+          </p>
+          <div className="footer-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
           </div>
         </div>
       </div>
