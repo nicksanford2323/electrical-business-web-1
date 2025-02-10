@@ -1,39 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { ThemeContext } from '../App';
 import './Reviews.css';
 
 function Reviews({ business }) {
+  const { isDark } = useContext(ThemeContext);
   if (!business) return null;
 
-  const {
-    rating: ratingStr,
-    reviews: reviewCountStr,
-    reviews_link: reviewsLink,
+  const { 
+    rating: ratingStr, 
+    reviews: reviewCountStr, 
+    reviews_link: reviewsLink 
   } = business.businessInfo || {};
 
   const rating = parseFloat(ratingStr) || 0;
   const reviewCount = parseInt(reviewCountStr, 10) || 0;
-  const reviewsArray = business.reviews || [];
+  const allReviews = business.reviews || [];
+
+  const filteredReviews = allReviews.filter(
+    review => review.review_text && review.review_text.trim() !== ""
+  );
+
   const businessName = business.businessName || '';
 
-  // Only show reviews if rating is at least 4.5 and there are 5 or more reviews
-  const showReviewsSection = (rating >= 4.5) && (reviewCount >= 5);
-
-  if (!showReviewsSection) {
-    return null;
-  }
+  if (filteredReviews.length === 0) return null;
 
   const [currentReview, setCurrentReview] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   const nextReview = useCallback(() => {
-    setCurrentReview(current => (current + 1) % reviewsArray.length);
-  }, [reviewsArray.length]);
+    setCurrentReview(current => (current + 1) % filteredReviews.length);
+  }, [filteredReviews.length]);
 
   const prevReview = useCallback(() => {
-    setCurrentReview(current => (current - 1 + reviewsArray.length) % reviewsArray.length);
-  }, [reviewsArray.length]);
+    setCurrentReview(current => (current - 1 + filteredReviews.length) % filteredReviews.length);
+  }, [filteredReviews.length]);
 
-  // Auto advance reviews
   useEffect(() => {
     if (!isPaused) {
       const timer = setInterval(nextReview, 5000);
@@ -42,12 +43,12 @@ function Reviews({ business }) {
   }, [isPaused, nextReview]);
 
   return (
-    <section className="reviews-section">
+    <section className={`reviews-section ${isDark ? 'theme-dark' : 'theme-light'}`}>
       <div className="reviews-header">
         <h2>{businessName} Reviews</h2>
-        <div className="rating-display">
+        <div className="overall-rating">
           <div className="stars">★★★★★</div>
-          <p>{rating} out of 5 stars based on {reviewCount} reviews</p>
+          <p className="rating-text">{rating} out of 5 stars based on {reviewCount} reviews</p>
         </div>
       </div>
 
@@ -60,25 +61,25 @@ function Reviews({ business }) {
           className="reviews-track"
           style={{ transform: `translateX(-${currentReview * 100}%)` }}
         >
-          {reviewsArray.map((review, index) => {
-            if (!review.review_text?.trim()) return null;
-
-            return (
-              <div className="review-slide" key={index}>
-                <div className="review-card">
-                  <div className="reviewer-info">
-                    <h3>{review.reviewer_name || 'Customer Review'}</h3>
-                    <div className="review-stars">★★★★★</div>
-                  </div>
-                  <p className="review-text">{review.review_text}</p>
+          {filteredReviews.map((review, index) => (
+            <div className="review-slide" key={index}>
+              <div className="review-card">
+                <div className="reviewer-info">
+                  <h3>{review.reviewer_name || 'Customer Review'}</h3>
+                  <div className="review-stars">★★★★★</div>
                 </div>
+                <p className="review-text">{review.review_text}</p>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        <button className="nav-button prev" onClick={prevReview}>←</button>
-        <button className="nav-button next" onClick={nextReview}>→</button>
+        <button className="nav-button prev" onClick={prevReview}>
+          &#8249;
+        </button>
+        <button className="nav-button next" onClick={nextReview}>
+          &#8250;
+        </button>
       </div>
 
       <div className="reviews-cta">
