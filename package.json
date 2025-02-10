@@ -1,13 +1,14 @@
 {
-  "name": "react-javascript",
+  "name": "electrical-business-web-1",
   "version": "1.0.0",
   "type": "module",
-  "description": "React TypeScript on Replit, using Vite bundler",
-  "homepage": "https://Nicksanford2323.github.io/electrical-business-web-1",
+  "description": "Vite + React site for electrical-business-web-1",
+  "homepage": "https://nicksanford2323.github.io/electrical-business-web-1/", 
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
+    // Optionally add a "deploy" script if you want to automate GH Pages push
   },
   "keywords": [],
   "author": "",
@@ -16,10 +17,9 @@
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
-    "gh-pages-alt": "^6.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "^5.2.2",
     "vite": "^5.0.0"
+    // Remove TypeScript or other dependencies if not using them
   }
 }
