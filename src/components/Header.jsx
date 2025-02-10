@@ -7,47 +7,37 @@ function Header({ business }) {
   const [isSticky, setIsSticky] = useState(false);
   const { isDark, toggleTheme } = useContext(ThemeContext);
 
-  // Extract all business info
+  // Extract business info
   const { businessName } = business;
-  const { phone, rating, reviews, reviews_link, color1, color2, logo } = business.businessInfo;
+  const { phone, rating, reviews, reviews_link, color1, color2 } = business.businessInfo;
+  const showReviews = parseFloat(rating) >= 4.5 && parseInt(reviews) >= 8;
+  const primaryColor = color1 || '#4a90e2';
+  const secondaryColor = color2 || '#357abd';
 
-  // Sticky header logic
+  // Use a smaller threshold for sticky header
   useEffect(() => {
     const handleScroll = () => {
-      setIsSticky(window.scrollY > 0);
+      setIsSticky(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const showLogo = color1 !== null && color2 !== null && logo;
-  const showReviews = parseFloat(rating) >= 4.5 && parseInt(reviews) >= 8;
-  const primaryColor = color1 || '#4a90e2';
-  const secondaryColor = color2 || '#357abd';
-
   return (
     <div className={`header-wrapper ${isSticky ? 'sticky' : ''}`}>
-      <div className="cta-banner" style={{ backgroundColor: primaryColor }}>
-        GET A FREE QUOTE TODAY - CALL US {phone}
-      </div>
+      {/* Clickable CTA Banner */}
+      <a className="cta-banner" style={{ backgroundColor: primaryColor }} href={`tel:${phone}`}>
+        FREE QUOTE: {phone}
+      </a>
+
       <header className={`header ${isDark ? 'theme-dark' : 'theme-light'}`}>
-        <div className="logo">
-          {showLogo ? (
-            <img src={logo} alt={businessName} />
-          ) : (
-            <h1>{businessName}</h1>
-          )}
+        {/* Business Name (logo placeholder) */}
+        <div className="business-name">
+          <h1>{businessName}</h1>
+          <small className="logo-placeholder">(Logo would be here)</small>
         </div>
 
-        <div 
-          className={`menu-button ${isMenuOpen ? 'open' : ''}`}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
+        {/* Navigation */}
         <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
           <ul style={{ '--hover-color': secondaryColor }}>
             <li><a href="#hero">Home</a></li>
@@ -59,6 +49,7 @@ function Header({ business }) {
           </ul>
         </nav>
 
+        {/* Header Actions */}
         <div className="header-actions">
           {showReviews && (
             <a 
@@ -69,29 +60,32 @@ function Header({ business }) {
             >
               <div className="stars">
                 {[...Array(5)].map((_, i) => (
-                  <span 
-                    key={i} 
-                    className={i < Math.floor(rating) ? 'star filled' : 'star'}
-                  >
+                  <span key={i} className={i < Math.floor(rating) ? 'star filled' : 'star'}>
                     ★
                   </span>
-                ))} 
+                ))}
               </div>
-              <span className="review-count">
-                {rating} ({reviews} reviews)
-              </span>
+              <span className="review-count">{rating} ({reviews} reviews)</span>
             </a>
           )}
-
           <button 
             onClick={toggleTheme} 
-            className="theme-toggle"
+            className="theme-toggle" 
             aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+            title="Toggle site theme"
           >
-            <span className="toggle-icon">
-              {isDark ? '☀️' : '🌙'}
-            </span>
+            <span className="toggle-icon">{isDark ? '☀️' : '🌙'}</span>
           </button>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div 
+          className={`menu-button ${isMenuOpen ? 'open' : ''}`}
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
         </div>
       </header>
     </div>
