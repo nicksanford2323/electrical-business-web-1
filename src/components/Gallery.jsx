@@ -1,16 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { ThemeContext } from '../App'; // Adjust path if needed
 import './Gallery.css';
 
 function Gallery({ business }) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const [showControls, setShowControls] = useState(false);
-  const images = business.sections.gallery;
-  const { color1, color2 } = business.businessInfo;
+  const { isDark } = useContext(ThemeContext);
+
+  // Get gallery images and brand colors from business data
+  const images = business.sections.gallery || [];
+  const { color1, color2 } = business.businessInfo || {};
 
   // Default colors if none provided
   const primaryColor = color1 || '#4a90e2';
   const secondaryColor = color2 || '#357abd';
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide(current => (current + 1) % images.length);
@@ -20,7 +25,7 @@ function Gallery({ business }) {
     setCurrentSlide(current => (current - 1 + images.length) % images.length);
   }, [images.length]);
 
-  // Auto advance slides (2.5 seconds instead of 3)
+  // Auto-advance slides every 2.5 seconds if not paused
   useEffect(() => {
     if (!isPaused) {
       const timer = setInterval(nextSlide, 2500);
@@ -28,25 +33,27 @@ function Gallery({ business }) {
     }
   }, [isPaused, nextSlide]);
 
-  // Hide controls after 3 seconds of no hover
+  // Hide navigation controls after 3 seconds of inactivity
   useEffect(() => {
     if (showControls) {
-      const timer = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
+      const timer = setTimeout(() => setShowControls(false), 3000);
       return () => clearTimeout(timer);
     }
   }, [showControls]);
 
   return (
-    <section className="gallery-section" style={{ backgroundColor: '#f8f8f8' }}>
+    <section className={`gallery-section ${isDark ? 'theme-dark' : 'theme-light'}`}>
       <div className="gallery-header">
-        <h2>Experience Our Craftsmanship</h2>
+        <h2>Our Project Portfolio</h2>
         <div 
           className="title-underline"
           style={{ backgroundColor: primaryColor }}
         ></div>
-        <p>See why our clients trust us with their electrical needs</p>
+        <p>
+          {isDark
+            ? 'Discover the quality and innovation behind our electrical solutions.'
+            : 'Experience our craftsmanship and attention to detail in every project.'}
+        </p>
       </div>
 
       <div 
@@ -61,7 +68,10 @@ function Gallery({ business }) {
         }}
         onMouseMove={() => setShowControls(true)}
       >
-        <div className="slides-wrapper" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+        <div 
+          className="slides-wrapper" 
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
           {images.map((img, index) => (
             <div key={index} className="slide">
               <img src={img} alt={`Project ${index + 1}`} />
@@ -75,7 +85,7 @@ function Gallery({ business }) {
           onClick={prevSlide}
           style={{ '--hover-bg': primaryColor }}
         >
-          ←
+          &#8249;
         </button>
 
         <button 
@@ -83,7 +93,7 @@ function Gallery({ business }) {
           onClick={nextSlide}
           style={{ '--hover-bg': primaryColor }}
         >
-          →
+          &#8250;
         </button>
 
         <div 
